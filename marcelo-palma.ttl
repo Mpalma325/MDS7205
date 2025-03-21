@@ -1,0 +1,20 @@
+@base <http://example.org/MarceloPalma.ttl>.
+@prefix foaf:<http://xmlns.com/foaf/0.1/>.
+@prefix rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix esq: <http://example.org/mi-esquema#>.
+
+esq:Estudiante rdfs:subclassof foaf:Person.
+
+esq:EstudiaEn a rdfs:Property;
+    rdfs:domain esq:Estudiante;
+    rdfs:range <http://www.wikidata.org/entity/Q3918>.
+
+<#yo> a esq:Estudiante;
+foaf:firstname "Marcelo Ivan";
+foaf:lastname "Palma Moena";
+foaf:mbox "marcelo.palma@ug.uchile.cl";
+foaf:img "http://i.pinimg.com/474x/a4/00/51/a4005186616969de8949563b102a5b93.jpg";
+foaf:OnlineAccount "@Mpalma325";
+foaf:knows <http://example.org/lmaldonado/laula>;
+foaf:knows <http://example.org/rodrigo-molina.ttl/rodrigom>;
+esq:estudiaEn <http://www.wikidata.org/entity/Q232141>.
