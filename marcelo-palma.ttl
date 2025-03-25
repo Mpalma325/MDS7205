@@ -16,6 +16,6 @@ foaf:lastname "Palma Moena";
 foaf:mbox <mailto:marcelo.palma@ug.uchile.cl>;
 foaf:img <http://i.pinimg.com/474x/a4/00/51/a4005186616969de8949563b102a5b93.jpg>;
 foaf:homepage <https://github.com/Mpalma325>;
-foaf:knows <http://example.org/lmaldonado/laula>;
-foaf:knows <http://example.org/rodrigo-molina.ttl/rodrigom>;
+foaf:knows <http://example.org/lmaldonado#laula>;
+foaf:knows <http://example.org/rodrigo-molina.ttl#rodrigom>;
 esq:estudiaEn <http://www.wikidata.org/entity/Q232141>.
