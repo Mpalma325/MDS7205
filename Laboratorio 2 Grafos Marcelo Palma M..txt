@@ -1,0 +1,55 @@
+
+#P1: Define los axiomas necesarios para inferir que :DaemonTargaryen :hasSpouse :RhaenyraTargaryen
+#y que :BaelaTargaryen :engagedTo :JacaerysVelaryon .
+# En este caso, ambas propiedades deberían ser simetrícas.
+:hasSpouse a owl:SymmetricProperty.
+:engagedTo a owl:SymmetricProperty.
+
+#P2:Define los axiomas necesarios para definir la propiedad :hasParent y, en particular, deducir
+#que :RhaenyraTargaryen :hasParent ViserysTargaryen.
+:hasParent owl:inverseOf :hasChild.
+
+#P3: Define los axiomas necesarios para definir la propiedad :ancestorOf y, en particular, pahra
+#deducir que :ViserysTargaryen :ancestorOf LucerysVelaryon.
+:ancestorOf a owl:TransitiveProperty ;
+            owl:propertyChainAxiom ( :hasChild :ancestorOf ) .
+
+:hasChild rdfs:subPropertyOf :ancestorOf .
+
+#P4: Define los axiomas necesarios para deducir la nueva propiedad :hasCousin (tiene primo/a hermano/a) 
+#y, en particular que :RhaenyraTargaryen :hasCousin :RhaenaTargaryen.
+:hasSibling owl:propertyChainAxiom(:hasParent :hasChild).
+:hasSibling a owl:IrreflexiveProperty. #Esta no funciona al ser una inferencia, pero la propiedad si debería ser irreflexiva.
+:hasSibling a owl:symmetricProperty.
+:hasCousin owl:propertyChainAxiom (:hasParent :hasSibling :hasChild).
+
+#P5:Define los axiomas necesarios para crear la clase :Targaryen. En particular, logra deducir
+#que :BaelaTargaryen a :Targaryen.
+:Targaryen owl:equivalentClass [ owl:onProperty :memberOf ; owl:hasValue :HouseTargaryen ] .
+
+#P6: Define los axiomas necesarios para definir la clase :Valyrian. Las personas que pertenecen
+#a :HouseTargaryen, :HouseVelaryion o :HouseCeltigar tambi´en pertenecen a :Valyrian.
+#En particular, deduce que :LucerysVelaryion a :Valyrian .
+
+:Valyrian owl:equivalentClass [
+  owl:unionOf (
+    [ owl:onProperty :memberOf ; owl:hasValue :HouseTargaryen ]
+    [ owl:onProperty :memberOf ; owl:hasValue :HouseVelaryon ]
+    [ owl:onProperty :memberOf ; owl:hasValue :HouseCeltigar ]
+  )
+] .
+
+#P7: Define los axiomas necesarios para definir la clase :Andal. Todos quienes no son de clase
+#Valyrian son de clase :Andal. En particular, deduce que :AlicentHightower a :Andal.
+
+:Andal owl:equivalentClass [
+  owl:intersectionOf (
+    :Person
+    [ owl:complementOf :Valyrian ]
+  )
+].
+
+#P8:Define los axiomas necesarios para definir la clase :OnlyMarriesValyrians para encontrar las
+#personas para quienes todos sus conyuges han sido de tipo :Valyrian. En particular, deduce
+#que :RhaenyraTargaryen a :OnlyMarriesValyrians.
+:OnlyMarriesValyrians a owl:Class ; rdfs:subclassOf [owl:allValuesFrom :Valyrian; owl:onProperty :hasSpouse].
