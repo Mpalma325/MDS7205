@@ -1,0 +1,192 @@
+Laboratorio 3. Grafos de Conocimiento. Marcelo Palma M.
+
+Considerando los siguientes prefijos para las siguientes preguntas:
+
+
+@prefix ex: <http://example.org#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nobel: <http://data.nobelprize.org/terms/> .
+@prefix dbo:   <http://dbpedia.org/ontology/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dbp:   <http://dbpedia.org/property/> .
+
+
+
+#P1. Selecciona Data 1 y Shapes 1 en la aplicación. Ejecuta el validador y trata de entender porqué
+falla. Modifica la shape para que se deje de producir el error de validación.
+
+La shape falla porque pide una string en la fecha de nacimiento. La shape modificada sería de la forma:
+
+
+ex:PersonShape a sh:NodeShape ;
+    sh:targetClass foaf:Person ;
+    sh:property [
+       sh:path foaf:birthday ;
+       sh:datatype xsd:date ;
+    ] .
+
+#P2. Agrega shapes adicionales para validar que los tipos de datos para foaf:givenName, foaf:name
+y foaf:familyName sean xsd:string. Edita los datos para verificar que tus shapes funcionan.
+
+ex:PersonShape a sh:NodeShape ;
+    sh:targetClass foaf:Person ;
+    sh:property [
+       sh:path foaf:birthday ;
+       sh:datatype xsd:date ;
+    ];
+	sh:property [ 
+      sh:path foaf:givenName ;
+         sh:datatype xsd:string ;
+    ];
+	sh:property [
+      sh:path foaf:name;
+      sh:datatype xsd:string;
+    ];
+	sh:property [
+      sh:path foaf:familyName;
+      sh:datatype xsd:string;
+    ].
+
+
+P3. Intenta modelar las restricciones anteriores en una sola restricción (sh:property) usando
+sh:alternativePath.
+
+
+ex:PersonShape a sh:NodeShape ;
+    sh:targetClass foaf:Person ;
+    sh:property [
+       sh:path foaf:birthday ;
+       sh:datatype xsd:date ;
+    ];
+	sh:property [ 
+       sh:path [sh:alternativePath (foaf:givenName foaf:name foaf:familyName)];
+       sh:datatype xsd:string;
+    ].
+
+P4. Selecciona Data 2 y Shapes 2. Agrega una restricción para asegurar que todos los ganadores
+de premios tienen al menos una dbo:affiliation a una dbo:University.
+
+ex:LaureateShape a sh:NodeShape ;
+    sh:targetClass nobel:Laureate ;
+	sh:property [
+      sh:path dbo:affiliation;
+      sh:class dbo:University;
+      sh:minCount 1
+    ].
+
+P5. La shape anterior no considera otros tipos de afiliaciones. Modifícala para que al menos una de las
+afiliaciones sea una universidad. Usa sh:qualifiedValueShape y sh:qualifiedMinCount.
+
+ex:LaureateShape a sh:NodeShape ;
+    sh:targetClass nobel:Laureate ;
+	sh:property [
+       sh:path dbo:affiliation;
+       sh:minCount 1;
+       sh:qualifiedValueShape [
+         sh:path dbo:affiliation;
+         sh:class dbo:University;
+       ];
+         sh:qualifiedMinCount 1;
+    ].
+   
+
+P6. 6. Añade otra restricción que requiera que el valor de dbp:dateOfBirth sea igual al de foaf:birthday.
+¿Esto se valida bien si alguna de las dos propiedades no esté definida?
+
+
+ex:LaureateShape a sh:NodeShape ;
+    sh:targetClass nobel:Laureate ;
+       sh:property [
+         sh:path dbp:dateOfBirth ;
+         sh:equals foaf:birthday;
+       ].
+Cuando una de las dos propiedades no esté bien definida, la validación tirará error.
+
+   
+
+P7. Intenta bypassear el problema anterior, permitiendo que una de las propiedades no esté
+definida. Puedes usar sh:or, sh:and y/o restricciones de cardinalidad.
+
+
+ex:LaureateShape a sh:NodeShape ;
+  sh:targetClass nobel:Laureate ;
+
+  sh:or (
+    [ sh:property [
+        sh:path foaf:birthday ;
+        sh:minCount 1 ;
+      ] ;
+      sh:not [
+        sh:property [
+          sh:path dbp:dateOfBirth ;
+          sh:minCount 1 ;
+        ]
+      ]
+    ]
+    [ sh:property [
+        sh:path dbp:dateOfBirth ;
+        sh:minCount 1 ;
+      ] ;
+      sh:not [
+        sh:property [
+          sh:path foaf:birthday ;
+          sh:minCount 1 ;
+        ]
+      ]
+    ]
+    [ sh:property [
+        sh:path foaf:birthday ;
+        sh:minCount 1 ;
+      ] ;
+      sh:property [
+        sh:path dbp:dateOfBirth ;
+        sh:minCount 1 ;
+        sh:equals foaf:birthday ;
+      ]
+    ]
+  ) .
+
+
+P8. Selecciona Data 3 y Shapes 3 y confirma que los datos se validan correctamente con las
+shapes. Ahora, agrega una restricci´on que valide las propiedades foaf:name, foaf:givenName
+y foaf:familyName usando sh:pattern. Ning´un nombre deber´ıa tener menos de dos caracteres y no deben contener gui´on bajo, ni n´umeros. Puedes usar https://regex101.com/ para
+desarrollar la expresi´on regular.
+
+nobel:LaureateShape a sh:NodeShape;
+    sh:targetClass nobel:Laureate
+    sh:property [
+       sh:path [sh:alternativePath (foaf:name foaf:givenName foaf:familyName)];
+       sh:pattern "^[^_0-9]{2,}$"
+       ].
+El dato de l:917 da error de validación ya que en el name está ""Satoshi &#332;mura".
+
+P9. A˜nade una restricci´on que verifique que el valor de la propiedad nobel:shate de los nodos de
+tipo nobel:LaureateAward sea uno de estos valores: "1", "2", "3" o "4".
+
+nobel:LaureateAwardShape a sh:NodeShape;
+    sh:targetClass nobel:LaureateAward;
+    sh:property [
+       sh:path nobel:share;
+       sh:in ("1" "2" "3" "4") ; 
+    ].
+
+
+P10. Agrega una restricción que requiera que todos los premios (tipo nobel:NobelPrize) tengan
+un nobel:motivation que sea un string de 10 caracteres o mas. Puede haber a lo mas una
+motivación por idioma.
+
+nobel:nobelPrizeShape a sh:NodeShape;
+  sh:targetClass nobel:nobelPrize;
+  sh:property [
+   	sh:path nobel:motivation;
+    sh:minCount 1;
+    sh:datatype rdf:langString;
+    sh:pattern "^.{10,}$";
+    sh:uniqueLang true
+  ].
+            
+
